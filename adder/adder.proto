@@ -1,0 +1,10 @@
+message AddFloatOperands{
+  required float a = 1;
+  required float b = 2;
+}
+message AddFloatResult{
+  required float r = 1;
+}
+service Adder{
+  rpc AddFloat(AddFloatOperands) returns (AddFloatResult);
+}
