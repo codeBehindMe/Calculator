@@ -31,6 +31,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
+	"log"
 	"net/http"
 )
 
@@ -82,13 +83,18 @@ func AddFloatHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	adderServiceAddress = flag.String("adder","localhost:3000","DNS/IP of Adder service including port")
-	port = flag.Int("port",80,"Port of service")
+	adderServiceAddress = flag.String("adder", "localhost:3000", "DNS/IP of Adder service including port")
+	port = flag.Int("port", 80, "Port of service")
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", BaseHandler)
 	router.HandleFunc("/float/add", AddFloatHandler)
 
-	http.ListenAndServe(":80", router)
+	log.Printf("Starting server on port %v", *port)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), router)
+	if err != nil {
+		log.Fatal("Could not start http server")
+	}
+
 }
