@@ -25,54 +25,61 @@ package main
 
 import (
 	"Calculator/adder"
-	"context"
+	"Calculator/factorialiser"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
-	"google.golang.org/grpc"
 	"log"
 	"net/http"
 )
 
 var adderServiceAddress *string
+var factorialiserServiceAddress *string
 var port *int
 
 func BaseHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, "You have reached Calculator")
 }
 
-type AddFloatOperands struct {
-	a, b float32
+type FactorialFloatOperand struct {
+	v float32
 }
 
-func RPCAddFloats(a, b *float32) (float32, error) {
-	conn, err := grpc.Dial(*adderServiceAddress, grpc.WithInsecure())
+func FactorialFloatHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	operand := FactorialFloatOperand{}
+	err := decoder.Decode(&operand)
+
 	if err != nil {
-		return 0.0, err
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = fmt.Fprintf(w, "could not unpack request body: %v", err)
 	}
-	client := adder.NewAdderClient(conn)
-	res, err := client.AddFloat(context.Background(), &adder.AddFloatOperands{
-		A: a,
-		B: b,
-	})
+
+	res, err := factorialiser.RPCFactorialiseFloat(factorialiserServiceAddress, &operand.v)
 	if err != nil {
-		return 0.0, err
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "could not calculate factorial: %v", err)
 	}
-	return res.GetR(), nil
+	_, _ = fmt.Fprint(w, res)
+}
+
+type AddFloatsOperand struct {
+	a, b float32
 }
 
 func AddFloatHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
-	operands := AddFloatOperands{}
+	operands := &AddFloatsOperand{}
 	err := decoder.Decode(&operands)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = fmt.Fprintf(w, "could not unpack request body: %v", err)
 	}
 
-	res, err := RPCAddFloats(&operands.a, &operands.b)
+	res, err := adder.RPCAddFloats(adderServiceAddress, &operands.a, &operands.b)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = fmt.Fprintf(w, "error when getting result: %v", err)
@@ -81,15 +88,24 @@ func AddFloatHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, res)
 }
 
+//validateFlags checks to see approriate variables are passed in to the flag
+// containers. Flag containers must be declared as program variables and
+// accessible in the global scope.
+func validateFlags(){
+
+}
+
 func main() {
 
-	adderServiceAddress = flag.String("adder", "localhost:3000", "DNS/IP of Adder service including port")
+	adderServiceAddress = flag.String("adder", "", "DNS/IP of Adder service including port")
+	factorialiserServiceAddress = flag.String("factorialiser", "", "DNS/IP of Factorialiser service")
 	port = flag.Int("port", 80, "Port of service")
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", BaseHandler)
 	router.HandleFunc("/float/add", AddFloatHandler)
+	router.HandleFunc("/float/factorial", FactorialFloatHandler)
 
 	log.Printf("Starting server on port %v", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), router)
