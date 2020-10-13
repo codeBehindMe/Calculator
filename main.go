@@ -128,7 +128,7 @@ func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("recieved operands a=%v , b=%v", a, b)
+	log.Printf("recieved operands a=%v , b=%v", operands.a, operands.b)
 
 	res, err := multiplier.RPCMultiplyFloat(multiplierServiceAddress, operands.a, operands.b)
 	if err != nil {
