@@ -114,6 +114,7 @@ type MultiplyFloatsOperand struct {
 }
 
 func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("recieved multiply float request")
 	decoder := json.NewDecoder(r.Body)
 
 	operands := &MultiplyFloatsOperand{}
@@ -121,6 +122,7 @@ func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&operands)
 
 	if err != nil {
+		log.Printf("error occured when decoding message: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = fmt.Fprintf(w, "Could not unpack request body: %v", err)
 
@@ -129,6 +131,7 @@ func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 
 	res, err := multiplier.RPCMultiplyFloat(multiplierServiceAddress, operands.a, operands.b)
 	if err != nil {
+		log.Printf("error when remote calling multiply float: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = fmt.Fprintf(w, "Could not multiply values: %v", err)
 
