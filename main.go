@@ -119,7 +119,7 @@ func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 
 	operands := &MultiplyFloatsOperand{}
 
-	err := decoder.Decode(&operands)
+	err := decoder.Decode(operands)
 	if err != nil {
 		log.Printf("error occured when decoding message: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
