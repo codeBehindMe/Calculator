@@ -25,7 +25,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// This is a compile-time assertion that a sufficiently up-to-date version
+// This is A compile-time assertion that A sufficiently up-to-date version
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
@@ -34,8 +34,8 @@ type AddFloatOperands struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	A *float32 `protobuf:"fixed32,1,req,name=a" json:"a,omitempty"`
-	B *float32 `protobuf:"fixed32,2,req,name=b" json:"b,omitempty"`
+	A *float32 `protobuf:"fixed32,1,req,name=A" json:"A,omitempty"`
+	B *float32 `protobuf:"fixed32,2,req,name=B" json:"B,omitempty"`
 }
 
 func (x *AddFloatOperands) Reset() {
@@ -228,7 +228,7 @@ func file_adder_proto_init() {
 var _ context.Context
 var _ grpc.ClientConnInterface
 
-// This is a compile-time assertion to ensure that this generated file
+// This is A compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
