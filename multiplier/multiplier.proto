@@ -1,0 +1,12 @@
+message MultiplyFloatMessage{
+  required float a  = 1;
+  required float b = 2;
+}
+
+message MultiplyFloatResult{
+  required float r = 1;
+}
+
+service Multiplier{
+  rpc MultiplyFloat(MultiplyFloatMessage) returns (MultiplyFloatResult);
+}
