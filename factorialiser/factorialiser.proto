@@ -1,0 +1,11 @@
+message FactorialiseFloatMessage{
+  required float a = 1;
+}
+
+message FactorialiseFloatResult{
+  required float r = 1;
+}
+
+service Factorialiser{
+  rpc FactorialFloat(FactorialiseFloatMessage) returns (FactorialiseFloatResult);
+}
