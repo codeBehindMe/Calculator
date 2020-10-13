@@ -120,7 +120,6 @@ func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 	operands := &MultiplyFloatsOperand{}
 
 	err := decoder.Decode(&operands)
-
 	if err != nil {
 		log.Printf("error occured when decoding message: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -128,6 +127,8 @@ func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	log.Printf("recieved operands a=%v , b=%v", a, b)
 
 	res, err := multiplier.RPCMultiplyFloat(multiplierServiceAddress, operands.a, operands.b)
 	if err != nil {
