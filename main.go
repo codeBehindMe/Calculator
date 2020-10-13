@@ -26,6 +26,7 @@ package main
 import (
 	"Calculator/adder"
 	"Calculator/factorialiser"
+	"Calculator/multiplier"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -36,6 +37,7 @@ import (
 
 var adderServiceAddress *string
 var factorialiserServiceAddress *string
+var multiplierServiceAddress *string
 var port *int
 
 func BaseHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +93,38 @@ func AddFloatHandler(w http.ResponseWriter, r *http.Request) {
 //validateFlags checks to see approriate variables are passed in to the flag
 // containers. Flag containers must be declared as program variables and
 // accessible in the global scope.
-func validateFlags(){
+func validateFlags() {
+
+}
+
+type MultiplyFloatsOperand struct {
+	a, b float32
+}
+
+func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	operands := &MultiplyFloatsOperand{}
+
+	err := decoder.Decode(&operands)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = fmt.Fprintf(w, "Could not unpack request body: %v", err)
+
+		return
+	}
+
+	res, err := multiplier.RPCMultiplyFloat(multiplierServiceAddress, operands.a, operands.b)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "Could not multiply values: %v", err)
+
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprint(w, res)
 
 }
 
@@ -99,6 +132,7 @@ func main() {
 
 	adderServiceAddress = flag.String("adder", "", "DNS/IP of Adder service including port")
 	factorialiserServiceAddress = flag.String("factorialiser", "", "DNS/IP of Factorialiser service")
+	multiplierServiceAddress = flag.String("multiplier", "", "DNS/IP of Multiplier service")
 	port = flag.Int("port", 80, "Port of service")
 
 	router := mux.NewRouter()
@@ -106,6 +140,7 @@ func main() {
 	router.HandleFunc("/", BaseHandler)
 	router.HandleFunc("/float/add", AddFloatHandler)
 	router.HandleFunc("/float/factorial", FactorialFloatHandler)
+	router.HandleFunc("/float/multiply", MultiplyFloatHandler)
 
 	log.Printf("Starting server on port %v", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), router)
