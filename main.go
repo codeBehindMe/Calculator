@@ -41,6 +41,7 @@ var multiplierServiceAddress *string
 var port *int
 
 func BaseHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, "You have reached Calculator")
 }
 
@@ -57,13 +58,19 @@ func FactorialFloatHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = fmt.Fprintf(w, "could not unpack request body: %v", err)
+
+		return
 	}
 
 	res, err := factorialiser.RPCFactorialiseFloat(factorialiserServiceAddress, &operand.v)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = fmt.Fprintf(w, "could not calculate factorial: %v", err)
+
+		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, res)
 }
 
@@ -79,14 +86,19 @@ func AddFloatHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = fmt.Fprintf(w, "could not unpack request body: %v", err)
+
+		return
 	}
 
 	res, err := adder.RPCAddFloats(adderServiceAddress, &operands.a, &operands.b)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = fmt.Fprintf(w, "error when getting result: %v", err)
+
+		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, res)
 }
 
