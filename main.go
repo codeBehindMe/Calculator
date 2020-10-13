@@ -110,16 +110,17 @@ func validateFlags() {
 }
 
 type MultiplyFloatsOperand struct {
-	a, b float32
+	a float32 `json:"a"`
+	b float32 `json:"b"`
 }
 
 func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("recieved multiply float request")
 	decoder := json.NewDecoder(r.Body)
 
-	operands := &MultiplyFloatsOperand{}
+	var operands MultiplyFloatsOperand
 
-	err := decoder.Decode(operands)
+	err := decoder.Decode(&operands)
 	if err != nil {
 		log.Printf("error occured when decoding message: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
