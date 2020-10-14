@@ -46,7 +46,7 @@ func BaseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type FactorialFloatOperand struct {
-	v float32
+	V float32
 }
 
 func FactorialFloatHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,15 +57,15 @@ func FactorialFloatHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_, _ = fmt.Fprintf(w, "could not unpack request body: %v", err)
+		_, _ = fmt.Fprintf(w, "could not unpack request body: %V", err)
 
 		return
 	}
 
-	res, err := factorialiser.RPCFactorialiseFloat(factorialiserServiceAddress, &operand.v)
+	res, err := factorialiser.RPCFactorialiseFloat(factorialiserServiceAddress, &operand.V)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "could not calculate factorial: %v", err)
+		_, _ = fmt.Fprintf(w, "could not calculate factorial: %V", err)
 
 		return
 	}
@@ -75,7 +75,7 @@ func FactorialFloatHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type AddFloatsOperand struct {
-	a, b float32
+	A, B float32
 }
 
 func AddFloatHandler(w http.ResponseWriter, r *http.Request) {
@@ -85,15 +85,15 @@ func AddFloatHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&operands)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "could not unpack request body: %v", err)
+		_, _ = fmt.Fprintf(w, "could not unpack request body: %V", err)
 
 		return
 	}
 
-	res, err := adder.RPCAddFloats(adderServiceAddress, &operands.a, &operands.b)
+	res, err := adder.RPCAddFloats(adderServiceAddress, &operands.A, &operands.B)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "error when getting result: %v", err)
+		_, _ = fmt.Fprintf(w, "error when getting result: %V", err)
 
 		return
 	}
@@ -122,20 +122,20 @@ func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := decoder.Decode(&operands)
 	if err != nil {
-		log.Printf("error occured when decoding message: %v", err)
+		log.Printf("error occured when decoding message: %V", err)
 		w.WriteHeader(http.StatusBadRequest)
-		_, _ = fmt.Fprintf(w, "Could not unpack request body: %v", err)
+		_, _ = fmt.Fprintf(w, "Could not unpack request body: %V", err)
 
 		return
 	}
 
-	log.Printf("recieved operands A=%v , B=%v", operands.A, operands.B)
+	log.Printf("recieved operands A=%V , B=%V", operands.A, operands.B)
 
 	res, err := multiplier.RPCMultiplyFloat(multiplierServiceAddress, operands.A, operands.B)
 	if err != nil {
-		log.Printf("error when remote calling multiply float: %v", err)
+		log.Printf("error when remote calling multiply float: %V", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "Could not multiply values: %v", err)
+		_, _ = fmt.Fprintf(w, "Could not multiply values: %V", err)
 
 		return
 	}
@@ -159,7 +159,7 @@ func main() {
 	router.HandleFunc("/float/factorial", FactorialFloatHandler)
 	router.HandleFunc("/float/multiply", MultiplyFloatHandler)
 
-	log.Printf("Starting server on port %v", *port)
+	log.Printf("Starting server on port %V", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), router)
 	if err != nil {
 		log.Fatal("Could not start http server")
