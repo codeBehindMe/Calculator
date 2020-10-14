@@ -12,7 +12,7 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
+   You should have received A copy of the GNU General Public License
    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -110,8 +110,8 @@ func validateFlags() {
 }
 
 type MultiplyFloatsOperand struct {
-	a float32 `json:"a"`
-	b float32 `json:"b"`
+	A float32 `json:"A"`
+	B float32 `json:"B"`
 }
 
 func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
@@ -129,9 +129,9 @@ func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("recieved operands a=%v , b=%v", operands.a, operands.b)
+	log.Printf("recieved operands A=%v , B=%v", operands.A, operands.B)
 
-	res, err := multiplier.RPCMultiplyFloat(multiplierServiceAddress, operands.a, operands.b)
+	res, err := multiplier.RPCMultiplyFloat(multiplierServiceAddress, operands.A, operands.B)
 	if err != nil {
 		log.Printf("error when remote calling multiply float: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
