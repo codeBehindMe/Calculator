@@ -40,5 +40,8 @@ func RPCMultiplyFloat(multiplierServiceAddress *string, a, b float32) (float32, 
 		A: &a,
 		B: &b,
 	})
+	if err != nil {
+		return 0.0, err
+	}
 	return res.GetR(), nil
 }
