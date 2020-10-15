@@ -152,6 +152,13 @@ func main() {
 	multiplierServiceAddress = flag.String("multiplier", "", "DNS/IP of Multiplier service")
 	port = flag.Int("port", 80, "Port of service")
 
+	flag.Parse()
+	log.Printf("exposing app on port: %d", *port)
+
+	log.Printf("using adderServiceAddress: %v", *adderServiceAddress)
+	log.Printf("using factorialiserServiceAddress: %v", *factorialiserServiceAddress)
+	log.Printf("using multiplierServiceAddress: %v", *multiplierServiceAddress)
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", BaseHandler)
