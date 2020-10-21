@@ -45,35 +45,6 @@ func BaseHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, "You have reached Calculator")
 }
 
-type FactorialFloatOperand struct {
-	V float32
-}
-
-func FactorialFloatHandler(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-
-	operand := FactorialFloatOperand{}
-	err := decoder.Decode(&operand)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = fmt.Fprintf(w, "could not unpack request body: %V", err)
-
-		return
-	}
-
-	res, err := factorialiser.RPCFactorialiseFloat(factorialiserServiceAddress, &operand.V)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "could not calculate factorial: %V", err)
-
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	_, _ = fmt.Fprint(w, res)
-}
-
 type AddFloatsOperand struct {
 	A, B float32
 }
@@ -127,7 +98,7 @@ func main() {
 
 	router.HandleFunc("/", BaseHandler)
 	router.HandleFunc("/float/add", AddFloatHandler)
-	router.HandleFunc("/float/factorial", FactorialFloatHandler)
+	router.HandleFunc("/float/factorial", factorialiser.GetHandler(factorialiserServiceAddress))
 	router.HandleFunc("/float/multiply", multiplier.GetHandler(multiplierServiceAddress))
 
 	log.Printf("Starting server on port %V", *port)
