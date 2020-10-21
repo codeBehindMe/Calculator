@@ -109,42 +109,6 @@ func validateFlags() {
 
 }
 
-type MultiplyFloatsOperand struct {
-	A float32 `json:"A"`
-	B float32 `json:"B"`
-}
-
-func MultiplyFloatHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("recieved multiply float request")
-	decoder := json.NewDecoder(r.Body)
-
-	var operands MultiplyFloatsOperand
-
-	err := decoder.Decode(&operands)
-	if err != nil {
-		log.Printf("error occured when decoding message: %V", err)
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = fmt.Fprintf(w, "Could not unpack request body: %V", err)
-
-		return
-	}
-
-	log.Printf("recieved operands A=%V , B=%V", operands.A, operands.B)
-
-	res, err := multiplier.RPCMultiplyFloat(multiplierServiceAddress, operands.A, operands.B)
-	if err != nil {
-		log.Printf("error when remote calling multiply float: %V", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "Could not multiply values: %V", err)
-
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	_, _ = fmt.Fprint(w, res)
-
-}
-
 func main() {
 
 	adderServiceAddress = flag.String("adder", "", "DNS/IP of Adder service including port")
@@ -164,7 +128,7 @@ func main() {
 	router.HandleFunc("/", BaseHandler)
 	router.HandleFunc("/float/add", AddFloatHandler)
 	router.HandleFunc("/float/factorial", FactorialFloatHandler)
-	router.HandleFunc("/float/multiply", MultiplyFloatHandler)
+	router.HandleFunc("/float/multiply", multiplier.GetHandler(multiplierServiceAddress))
 
 	log.Printf("Starting server on port %V", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), router)
