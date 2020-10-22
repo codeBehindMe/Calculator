@@ -25,11 +25,17 @@ package adder
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"google.golang.org/grpc"
+	"net/http"
 )
 
+type AddFloatsOperand struct {
+	A, B float32
+}
 
-func RPCAddFloats(adderServiceAddress *string , a, b *float32) (float32, error) {
+func RPCAddFloats(adderServiceAddress *string, a, b *float32) (float32, error) {
 	conn, err := grpc.Dial(*adderServiceAddress, grpc.WithInsecure())
 	if err != nil {
 		return 0.0, err
@@ -45,3 +51,28 @@ func RPCAddFloats(adderServiceAddress *string , a, b *float32) (float32, error) 
 	return res.GetR(), nil
 }
 
+func GetHandler(adderServiceAddress *string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		decoder := json.NewDecoder(r.Body)
+
+		operands := &AddFloatsOperand{}
+		err := decoder.Decode(&operands)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = fmt.Fprintf(w, "could not unpack request body: %V", err)
+
+			return
+		}
+
+		res, err := RPCAddFloats(adderServiceAddress, &operands.A, &operands.B)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = fmt.Fprintf(w, "error when getting result: %V", err)
+
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprint(w, res)
+	}
+}
