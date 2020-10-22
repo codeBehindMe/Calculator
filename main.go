@@ -72,7 +72,7 @@ func main() {
 	router.HandleFunc("/float/factorial", factorialiser.GetHandler(factorialiserServiceAddress))
 	router.HandleFunc("/float/multiply", multiplier.GetHandler(multiplierServiceAddress))
 
-	log.Printf("Starting server on port %V", *port)
+	log.Printf("Starting server on port %v", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), router)
 	if err != nil {
 		log.Fatal("Could not start http server")
