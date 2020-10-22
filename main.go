@@ -27,7 +27,6 @@ import (
 	"Calculator/adder"
 	"Calculator/factorialiser"
 	"Calculator/multiplier"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -43,34 +42,6 @@ var port *int
 func BaseHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, "You have reached Calculator")
-}
-
-type AddFloatsOperand struct {
-	A, B float32
-}
-
-func AddFloatHandler(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-
-	operands := &AddFloatsOperand{}
-	err := decoder.Decode(&operands)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "could not unpack request body: %V", err)
-
-		return
-	}
-
-	res, err := adder.RPCAddFloats(adderServiceAddress, &operands.A, &operands.B)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "error when getting result: %V", err)
-
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	_, _ = fmt.Fprint(w, res)
 }
 
 //validateFlags checks to see approriate variables are passed in to the flag
@@ -97,7 +68,7 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", BaseHandler)
-	router.HandleFunc("/float/add", AddFloatHandler)
+	router.HandleFunc("/float/add", adder.GetHandler(adderServiceAddress))
 	router.HandleFunc("/float/factorial", factorialiser.GetHandler(factorialiserServiceAddress))
 	router.HandleFunc("/float/multiply", multiplier.GetHandler(multiplierServiceAddress))
 
