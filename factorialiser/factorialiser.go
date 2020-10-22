@@ -25,8 +25,15 @@ package factorialiser
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"google.golang.org/grpc"
+	"net/http"
 )
+
+type FactorialFloatOperand struct {
+	V float32
+}
 
 func RPCFactorialiseFloat(factorialiserServiceAddress *string, a *float32) (float32, error) {
 	conn, err := grpc.Dial(*factorialiserServiceAddress, grpc.WithInsecure())
@@ -43,4 +50,31 @@ func RPCFactorialiseFloat(factorialiserServiceAddress *string, a *float32) (floa
 		return 0.0, err
 	}
 	return res.GetR(), nil
+}
+
+func GetHandler(factorialiserServiceAddress *string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		decoder := json.NewDecoder(r.Body)
+
+		operand := FactorialFloatOperand{}
+		err := decoder.Decode(&operand)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = fmt.Fprintf(w, "could not unpack request body: %V", err)
+
+			return
+		}
+
+		res, err := RPCFactorialiseFloat(factorialiserServiceAddress, &operand.V)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = fmt.Fprintf(w, "could not calculate factorial: %V", err)
+
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprint(w, res)
+	}
 }
